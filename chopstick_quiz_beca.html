@@ -1,0 +1,202 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>How Asian Are Your Chopstick Habits? — Beca</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* small custom tweaks */
+    body { background: linear-gradient(180deg,#f8fafc 0%, #fff 100%); }
+    .btn { @apply px-4 py-2 rounded-xl font-semibold shadow; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+  <div id="root" class="w-full max-w-3xl"></div>
+
+  <!-- React + ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- Babel for in-browser JSX transpile (fine for single-file demos) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+
+const { useState } = React;
+
+function IconCopy({className}) {
+  return (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M9 12H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
+      <rect x="9" y="9" width="11" height="11" rx="2" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+function IconRefresh({className}) {
+  return (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M20 12a8 8 0 1 0-1.7 4.9L20 20" />
+      <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M20 4v6h-6" />
+    </svg>
+  );
+}
+
+function ChopstickQuiz() {
+  const questions = [
+    { id:1, q:"When you pick up chopsticks at a restaurant, you...", opts:[
+      {k:"A", t:"Rub them together like it's a ritual 🔥"},
+      {k:"B", t:"Just start eating, no nonsense"},
+      {k:"C", t:"Panic because you forgot which stick goes on top"},
+    ]},
+    { id:2, q:"How do you hold them?", opts:[
+      {k:"A", t:"Perfectly — grandma would approve"},
+      {k:"B", t:"Eh, they cross sometimes but food still reaches my mouth"},
+      {k:"C", t:"Like Edward Scissorhands"},
+    ]},
+    { id:3, q:"You drop your chopsticks. What now?", opts:[
+      {k:"A", t:"Replace them quietly — shame must not be seen"},
+      {k:"B", t:"Laugh it off"},
+      {k:"C", t:"Use your hands. Primitive times call for primitive tools"},
+    ]},
+    { id:4, q:"You're eating rice. Do you...", opts:[
+      {k:"A", t:"Lift the bowl and scoop (Japan style 🇯🇵)"},
+      {k:"B", t:"Jab your chopsticks into it like a flag (😨 NOOO!)"},
+      {k:"C", t:"Mix with sauce and shovel like a pro"},
+    ]},
+    { id:5, q:"Someone hands you a new pair. Do you...", opts:[
+      {k:"A", t:"Split them evenly like a master of symmetry"},
+      {k:"B", t:"Snap them crooked and pretend it's fine"},
+      {k:"C", t:"Stab your food immediately"},
+    ]},
+    { id:6, q:"When eating noodles:", opts:[
+      {k:"A", t:"Slurp loud and proud"},
+      {k:"B", t:"Try to be polite and silent"},
+      {k:"C", t:"Noodles: gone, sauce: everywhere"},
+    ]},
+    { id:7, q:"Can you pick up a single peanut or bean?", opts:[
+      {k:"A", t:"Easily"},
+      {k:"B", t:"With effort"},
+      {k:"C", t:"I use the bowl like a scoop"},
+    ]},
+    { id:8, q:"Be honest — do you use chopsticks for snacks or chips?", opts:[
+      {k:"A", t:"Always (no greasy fingers gang ✨)"},
+      {k:"B", t:"Sometimes"},
+      {k:"C", t:"Only for ramen"},
+    ]},
+  ];
+
+  const [answers, setAnswers] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  function selectAnswer(qid, key) {
+    if (submitted) return;
+    setAnswers(s => ({...s, [qid]: key}));
+  }
+
+  function calculateResult() {
+    const counts = {A:0,B:0,C:0};
+    questions.forEach(q => {
+      const a = answers[q.id] || "C";
+      counts[a] = (counts[a] || 0) + 1;
+    });
+    if (counts.A >= counts.B && counts.A >= counts.C) return {title:"Chopstick Sensei 🥢", text:"You wield those sticks like extensions of your soul. Respect."};
+    if (counts.B >= counts.A && counts.B >= counts.C) return {title:"Casual Pro 🍜", text:"You can survive any Asian meal without embarrassing yourself."};
+    return {title:"Brave Beginner 🐣", text:"Your spirit is strong, but your coordination needs XP points."};
+  }
+
+  function shareText(result) {
+    const scoreLines = questions.map(q => `Q${q.id}: ${answers[q.id] || "(no answer)"}`).join("\\n");
+    return `How Asian Are Your Chopstick Habits?\\nResult: ${result.title}\\n${result.text}\\n\\nAnswers:\\n${scoreLines}`;
+  }
+
+  function handleCopy(result) {
+    const txt = shareText(result);
+    navigator.clipboard.writeText(txt).then(() => {
+      setCopied(true);
+      setTimeout(()=>setCopied(false), 1800);
+    }).catch(()=>{ alert("Copy failed — maybe your browser blocked clipboard access.");});
+  }
+
+  function reset() {
+    setAnswers({});
+    setSubmitted(false);
+  }
+
+  const result = submitted ? calculateResult() : null;
+
+  return (
+    <div className="p-6 bg-white rounded-2xl shadow-lg">
+      <header>
+        <h1 className="text-2xl font-extrabold mb-1">How Asian Are Your Chopstick Habits?</h1>
+        <p className="text-sm text-slate-500">A playful, non-serious quiz about chopstick habits. Take it with humor!</p>
+      </header>
+
+      <div className="mt-6 space-y-6">
+        {questions.map((q, idx) => (
+          <div key={q.id} className="p-4 border rounded-xl">
+            <div className="flex justify-between items-center">
+              <div>
+                <div className="text-sm text-slate-400">Question {idx+1}</div>
+                <div className="font-semibold">{q.q}</div>
+              </div>
+              <div className="text-xs text-slate-400">{answers[q.id] ? `Picked: ${answers[q.id]}` : "Not answered"}</div>
+            </div>
+
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {q.opts.map(o => {
+                const active = answers[q.id] === o.k;
+                return (
+                  <button key={o.k} onClick={() => selectAnswer(q.id, o.k)}
+                    className={
+                      `p-3 rounded-lg text-left border transition-shadow focus:outline-none ${active ? "shadow-lg border-slate-300 bg-slate-50" : "hover:shadow-sm bg-white"}`
+                    }>
+                    <div className="text-sm font-bold">{o.k}</div>
+                    <div className="text-sm">{o.t}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-6 flex gap-3 justify-end items-start">
+        {!submitted ? (
+          <button onClick={() => setSubmitted(true)} className="btn bg-gradient-to-r from-sky-500 to-indigo-600 text-white">Submit</button>
+        ) : (
+          <>
+            <div className="flex-1">
+              <div className="p-4 bg-slate-50 rounded-xl">
+                <div className="text-lg font-bold">{result.title}</div>
+                <div className="text-sm mt-1">{result.text}</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button onClick={() => handleCopy(result)} className="px-3 py-2 rounded-xl border flex items-center gap-2 bg-white">
+                <IconCopy /> <span className="text-sm">{copied ? "Copied!" : "Copy Result"}</span>
+              </button>
+
+              <button onClick={reset} className="px-3 py-2 rounded-xl border flex items-center gap-2 bg-white">
+                <IconRefresh /> <span className="text-sm">Retake</span>
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
+      <footer className="mt-4 text-xs text-slate-400 flex justify-between items-center">
+        <div>Made for laughs — not a cultural test.</div>
+        <div className="text-xs">Made by <strong>Beca</strong></div>
+      </footer>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<ChopstickQuiz />);
+
+  </script>
+</body>
+</html>
